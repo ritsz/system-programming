@@ -16,7 +16,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void *first(void *args)
 {
-
+	pthread_detach(pthread_self());
 	char *buff  = "LOREM IPSUM dolor sit amet, consectetur adipiscing elit.\
 Suspendisse vestibulum euleo quis semper. Morbi lacinia feugiat\
 volutpat. Integer congue tempor risus feugiat laoreet. Etiam \
@@ -35,13 +35,14 @@ tristique iaculis tellus dapibus a. In in vulputate nibh\n\n";
 
 void *second(void *args)
 {
+	pthread_detach(pthread_self());
 	char buff2[512];
 	int read_chars;
 	while (1) {
 		lseek(fid, SEEK_SET, 0);
 		pthread_mutex_lock(&mutex);
 		if ((read_chars = read(fid, buff2, strlen(buff2))) < 0)
-			perror("Write thread 2");
+			perror("Read thread 2");
 		else {
 			buff2[read_chars] = '\n';
 			write(STDOUT_FILENO, buff2, read_chars+1);
