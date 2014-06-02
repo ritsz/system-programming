@@ -6,10 +6,10 @@
 int main(void)
 {
 	int fd;
+	char *buff, *shared_buff;
+
 	if ((fd = open("testfile.txt", O_RDWR)) < 0)
 		perror("Open");
-	
-	char *buff;
 	/*
 	 * Creating a private Copy-on-Write mapping of file. Any updates to this
 	 * structure affects only the private memory and doesn't sync on the
@@ -25,8 +25,6 @@ int main(void)
 	/* Only memory value was changed, file doesn't get affected even if
 	 * msync is tried
 	 */
-
-	char *shared_buff;
 	/* Creating a shared mapping of file. Any changes made to this mapping,
 	 * are reflected in all processes sharing this memory map. The changes
 	 * affect the file as well. But msync should be called to make sure.
@@ -44,6 +42,8 @@ int main(void)
 		perror("msync");
 	if (munmap(shared_buff, 512*1024) < 0)
 		perror("Unmap");
+	if (close(fd) < 0)
+		perror("Close");
 
 	return 0;
 }
