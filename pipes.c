@@ -10,8 +10,10 @@ int pcfd[2];	/*Parent to child pipe*/
 int main(void)
 {
 	write(1, "Making pipes\n", 13);
-	if (pipe(pcfd) != 0)
+	if (pipe(pcfd) != 0) {
 		perror("Pipe");
+		_exit(-1);
+	}
 	int flags = fcntl(pcfd[0], F_GETFL);
 	flags |= O_NONBLOCK;
 	fcntl(pcfd[0], F_SETFL, flags);
@@ -25,20 +27,25 @@ int main(void)
 
 	if (cpid < 0) {
 		perror("Fork");
+		_exit(-1);
 	} else if (cpid == 0) {
 		write(1, "Child Process\n", 14);
 		char buff[19];
 		close(pcfd[1]);
-		if (read(pcfd[0], buff, 19) < 0)
+		if (read(pcfd[0], buff, 19) < 0) {
 			perror("Child Read");
 	/*Setting O_NONBLOCK gives "Resource temporarily unavailable"*/
-		else
+			_exit(-1);
+		} else {
 			printf("%s was read from parent\n", buff);
+		}
 		close(pcfd[0]);
 	} else {
 		wait(NULL);
-		if (!write(1, "Parent Process\n", 15))
+		if (!write(1, "Parent Process\n", 15)) {
 			perror("write");
+			_exit(-1);
+		}
 		close(pcfd[0]);/*Close read end of pipe*/
 		write(pcfd[1], "System Programming\0", 19);
 		close(pcfd[1]);/*Close write end of pipe*/

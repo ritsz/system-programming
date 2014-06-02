@@ -5,13 +5,16 @@
 int main(void)
 {
 	int pfds[2];
-	if (pipe(pfds) < 0)
+	if (pipe(pfds) < 0) {
 		perror("Pipe");
+		_exit(-1);
+	}
 
 	int pid = fork();
-	if (pid < 0)
+	if (pid < 0) {
 		perror("Fork");
-
+		_exit(-1);
+	}
 	if (pid == 0) {
 		close(pfds[0]);		/*Not required for child*/
 		close(STDOUT_FILENO);	/*Close the STDOUT_FILENO*/

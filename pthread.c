@@ -27,8 +27,10 @@ tristique iaculis tellus dapibus a. In in vulputate nibh\n\n";
 	while (1) {
 		pthread_mutex_lock(&mutex);
 		lseek(fid, SEEK_SET, 0);	
-		if (write(fid, buff, strlen(buff)) < 0)
+		if (write(fid, buff, strlen(buff)) < 0) {
 			perror("Write thread 1");
+			_exit(-1);
+		}
 		pthread_mutex_unlock(&mutex);
 	}
 }
@@ -41,9 +43,10 @@ void *second(void *args)
 	while (1) {
 		lseek(fid, SEEK_SET, 0);
 		pthread_mutex_lock(&mutex);
-		if ((read_chars = read(fid, buff2, strlen(buff2))) < 0)
+		if ((read_chars = read(fid, buff2, strlen(buff2))) < 0) {
 			perror("Read thread 2");
-		else {
+			_exit(-1);
+		} else {
 			buff2[read_chars] = '\n';
 			write(STDOUT_FILENO, buff2, read_chars+1);
 		}
@@ -57,8 +60,10 @@ int main(void)
 	/*
 	   Creating/ Opening the file that stores common data
 	  */
-	if ((fid = open("mutex_pthread_file", O_CREAT | O_RDWR)) == 0)
+	if ((fid = open("mutex_pthread_file", O_CREAT | O_RDWR)) == 0) {
 		perror("Open");
+		_exit(-1);
+	}
 
 	pthread_t thread_id, second_id;
 	/*
@@ -67,10 +72,14 @@ int main(void)
 	   daemon), a thread start function. The thread finishes when this
 	   function returns or when pthread_exit is called.
 	 */
-	if (pthread_create(&thread_id, NULL, first, NULL) != 0)
+	if (pthread_create(&thread_id, NULL, first, NULL) != 0) {
 		perror("Pthread create");
-	if (pthread_create(&second_id, NULL, second, NULL) != 0)
+		_exit(-1);
+	}
+	if (pthread_create(&second_id, NULL, second, NULL) != 0) {
 		perror("Pthread create");
+		_exit(-1);
+	}
 
 	/*
 	   We need to wait for the thread to finish. We can do that by maunually

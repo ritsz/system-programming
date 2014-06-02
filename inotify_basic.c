@@ -5,13 +5,17 @@ int main(void)
 {
 	int fd, watch_d;
 	char buf[512];
-	if ((fd = inotify_init()) == -1)
+	if ((fd = inotify_init()) == -1) {
 		perror("Inotify Init");
+		_exit(-1);
+	}
 	
 	if ((watch_d = inotify_add_watch(fd,
 			"/root/PROGRAMMING/System_Programming",
-			IN_MOVED_TO|IN_MOVED_FROM|IN_CREATE|IN_DELETE)) == -1)
+			IN_MOVED_TO|IN_MOVED_FROM|IN_CREATE|IN_DELETE)) == -1) {
 		perror("inotify_add_watch");
+		_exit(-1);
+	}
 
 	while (1) {
 		int len = read(fd, buf, 512);
@@ -26,10 +30,14 @@ int main(void)
 			
 			if (event->mask & IN_DELETE) {
 				printf("Delete Event. Stopping monitor\n");
-				if (inotify_rm_watch(fd, watch_d) == -1)
+				if (inotify_rm_watch(fd, watch_d) == -1) {
 					perror("Removing watch");
-				if (close(fd) == -1)
+					_exit(-1);
+				}
+				if (close(fd) == -1) {
 					perror("Closing event FD");
+					_exit(-1);
+				}
 				return(0);
 			}
 

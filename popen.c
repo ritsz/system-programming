@@ -8,8 +8,10 @@ int main(int argc, char* argv[])
 		_exit(-1);
 	}
 	FILE *file = popen( argv[1], "r");
-	if (file == NULL)
+	if (file == NULL) {
 		perror("popen");
+		_exit(-1);
+	}
 
 	int fd = fileno(file);
 	int len = 0;

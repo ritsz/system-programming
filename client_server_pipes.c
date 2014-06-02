@@ -14,8 +14,10 @@ int client(int readfd, int writefd, char path[])
 {
 	int len = strlen(path);
 	/* Send path to server*/
-	if (write(writefd, path, len) < 0)
+	if (write(writefd, path, len) < 0) {
 		perror("Sending path to server");
+		_exit(-1);
+	}
 
 	char buff[256];
 
@@ -35,8 +37,10 @@ int server(int readfd, int writefd)
 	/*Read path from client*/
 	char buff[256];
 	int len = 256;
-	if ((len = read(readfd, buff, len)) < 0)
+	if ((len = read(readfd, buff, len)) < 0) {
 		perror("Path from client");
+		_exit(-1);
+	}
 	
 	int filed;
 	/*Open file and report to client if file not available*/
@@ -65,15 +69,20 @@ int main(int argc, char* argv[])
 		_exit(-1);
 	}
 		
-	if (pipe(pcfd) < 0)
+	if (pipe(pcfd) < 0) {
 		perror("Pipe");
-	if (pipe(cpfd) < 0)
+		_exit(-1);
+	}
+	if (pipe(cpfd) < 0) {
 		perror("Pipe");
+		_exit(-1);
+	}
 /* Pipe not made O_NONBLOCL because we want read, writes to block*/
 	pid_t cpid = fork();
 
 	if (cpid < 0) {
 		perror("Fork");
+		_exit(-1);
 	} else if (cpid == 0) {
 /*Closing pipe ends that are not needed by server */
 		close(cpfd[0]);
