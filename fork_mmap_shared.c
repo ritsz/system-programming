@@ -31,6 +31,10 @@ int main(void)
 		printf("CHILD %c%c%c\n", *buff, *(buff+1), *(buff+2));
 		buff[0] = 'D';
 		printf("CHILD %c%c%c\n", *buff, *(buff+1), *(buff+2));
+		if (msync(buff, 512*1024, MS_SYNC) < 0) {
+			perror("Msync");
+			_exit(-1);
+		}
 		_exit(0);
 	} else {
 		wait(-1);
