@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <sys/inotify.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 int main(void)
 {
@@ -9,7 +11,10 @@ int main(void)
 		perror("Inotify Init");
 		_exit(-1);
 	}
-	
+	int flags = fcntl(fd, F_GETFL);
+	flags |= O_NONBLOCK;
+	fcntl(fd, F_SETFL, flags);
+
 	if ((watch_d = inotify_add_watch(fd,
 			"/root/PROGRAMMING/System_Programming",
 			IN_MOVED_TO|IN_MOVED_FROM|IN_CREATE|IN_DELETE)) == -1) {
@@ -18,7 +23,11 @@ int main(void)
 	}
 
 	while (1) {
-		int len = read(fd, buf, 512);
+		int len;
+		if ((len = read(fd, buf, 512)) < 0) {
+			perror("Read");
+		//	_exit(-1);
+		}
 		int i = 0;
 		while(i<len) {
 			struct inotify_event *event = (struct inotify_event *)&buf[i];
@@ -43,5 +52,6 @@ int main(void)
 
 			i += sizeof(struct inotify_event) + event->len;
 		}
+		sleep(5);
 	}
 }
