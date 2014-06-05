@@ -75,6 +75,7 @@ int main(void)
 		 * events are related is that they have the same cookie value
 		 */
 
+		write(STDOUT_FILENO, "\nWaiting on select()\n", 21);
 		int ret_fd = select(max(fd,fd2)+1, &readfds, &writefds,NULL, NULL);
 		if (ret_fd == -1) {
 			perror("select");
@@ -94,6 +95,5 @@ int main(void)
 			}
 			read_inotify_queue(buf, len);	
 		}
-	}
-	
+	}	
 }
