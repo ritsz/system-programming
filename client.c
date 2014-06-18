@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
 	char recvBuff[2048];
 	struct sockaddr_in serv_addr; 
 
-	if(argc != 3) {
-		printf("\n Usage: %s <ip of server> <file to read>\n",argv[0]);
+	if(argc != 2) {
+		printf("\n Usage: %s <ip of server>\n",argv[0]);
 		return 1;
 	} 
 
@@ -41,17 +41,31 @@ int main(int argc, char *argv[])
 		return 1;
 	} 
 
-	if ((write(sockfd, argv[2], 128)) < 0) {
-		perror("Socket write");
-		close(sockfd);
-		exit(-1);
-	}
+	/* Timestamp received */
 
-	while ( (n = read(sockfd, recvBuff, sizeof(recvBuff)-1)) > 0) {
-		recvBuff[n] = 0;
-		if(fputs(recvBuff, stdout) == EOF) {
-			printf("\n Error : Fputs error\n");
+	n = read(sockfd, recvBuff, sizeof(recvBuff)-1);
+	if (n < 0)
+		perror("socket read");
+	recvBuff[n] = 0;
+	printf("%s\n", recvBuff);
+
+
+	while (1) {
+		char filename[128] = {0};
+		printf("\n\nEnter a file name : ");
+		scanf("%s", filename);
+		if ((write(sockfd, filename, 128)) < 0) {
+			perror("Socket write");
+			close(sockfd);
+			exit(-1);
 		}
+
+		memset(recvBuff, 0, sizeof(recvBuff));
+		n = read(sockfd, recvBuff, sizeof(recvBuff)-1);
+		if (n < 0)
+			perror("socket read");
+		recvBuff[n] = 0;
+		printf("%s\n", recvBuff);
 	}
 
 	close(sockfd);
