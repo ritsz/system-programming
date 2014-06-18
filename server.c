@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <time.h> 
 #include <fcntl.h>
+#include <errno.h>
 
 int handle_connection(int sockd)
 {
@@ -18,25 +19,24 @@ int handle_connection(int sockd)
 	/* Read the name of file to read */
 	if ((ret = read(sockd, buff, sizeof(buff))) <= 0) {
 		perror("socket read");
-		exit(-1);
+		exit(-2);
 	}
 	buff[ret] = '\0';
 
 	printf("Request for %s file received\n", buff);
-
+	
 	if ((fd = open(buff, O_RDONLY)) < 0) {
+		char *errmsg = strerror(errno);
+		write(sockd, errmsg, strlen(errmsg));
 		perror("file open");
-		exit(-1);
 	}
 
 	if ((ret = read(fd, buff, 2048)) < 0) {
 		perror("file read");
-		exit(-1);
 	}
 
 	if ((ret = write(sockd, buff, ret)) < 0) {
 		perror("socket write");
-		exit(-1);
 	}
 	
 	return 0;
@@ -88,15 +88,11 @@ int main(int argc, char *argv[])
 			write(connfd, sendBuff, strlen(sendBuff));
 			while (1) {
 				printf("Waiting for client data\n");
-				if (handle_connection(connfd) < 0) {
-					perror("handle_connection");
-					break;
-				}
+				handle_connection(connfd);
+				printf("Connection was handelled\n");
 			}
-			printf("Client handelling done\n");
-			close(connfd);
-			exit(0);
 		}
+		/* Parent close the connfd descriptor */
 		close(connfd);
 	 }
 }

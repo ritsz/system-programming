@@ -54,6 +54,10 @@ int main(int argc, char *argv[])
 		char filename[128] = {0};
 		printf("\n\nEnter a file name : ");
 		scanf("%s", filename);
+		if (filename[0] == '?') {
+			close(sockfd);
+			return 0;
+		}
 		if ((write(sockfd, filename, 128)) < 0) {
 			perror("Socket write");
 			close(sockfd);
@@ -67,12 +71,5 @@ int main(int argc, char *argv[])
 		recvBuff[n] = 0;
 		printf("%s\n", recvBuff);
 	}
-
-	close(sockfd);
-
-	if(n < 0) {
-		printf("\n Read error \n");
-	} 
-
 	return 0;
 }
