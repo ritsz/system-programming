@@ -3,13 +3,14 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 
-#define TEST_EXEC_FD 0
+#define TEST_EXEC_FD 1
 
 int main(void)
 {
-	int pfds[2];
-	if (pipe(pfds) < 0) {
+	int pfds[2], flags;
+	if (pipe2(pfds, O_CLOEXEC) < 0) {
 		perror("Pipe");
 		_exit(-1);
 	}
@@ -19,6 +20,7 @@ int main(void)
 		perror("Fork");
 		_exit(-1);
 	}
+	
 	if (pid == 0) {
 		close(pfds[0]);		/*Not required for child*/
 		close(STDOUT_FILENO);	/*Close the STDOUT_FILENO*/
@@ -27,6 +29,12 @@ int main(void)
 					 STDOUT. Thus anything ls returns to
 					 STDOUT, goes to pfds[1] instead, which
 					 can be read at pfds[0]*/
+		system("ls -l /proc/$(($$))/fd");
+		/*
+		   lrwx------ 1 root root 64 Jun 22 20:33 0 -> /dev/pts/4
+		   l-wx------ 1 root root 64 Jun 22 20:33 1 -> pipe:[23085]
+		   lrwx------ 1 root root 64 Jun 22 20:33 2 -> /dev/pts/4
+		 */
 		execlp("ls", "ls", "-l", NULL); /* Execute ls command. Upon exec
 						 the text part is overlayed by
 						 new code. The file descriptors
@@ -47,9 +55,15 @@ int main(void)
 						  from STDIN by wc command*/
 			execlp("wc", "wc", "-l", NULL);
 		}
+
+		wait(NULL);
 		int fd = open("LOG", O_RDWR|O_CREAT);
 		char buff[2048];
-		int ret = read(pfds[0], buff, 2048);
+		int ret = read(pfds[0], buff, 2048); /* data coming from exec
+							proc is written to pipe
+							and received and written
+							to file by parent
+						      */
 		write(fd, buff, ret);
 		close(fd);
 	}

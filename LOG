@@ -1,0 +1,25 @@
+total 0
+lrwx------ 1 root root 64 Jun 22 20:36 0 -> /dev/pts/4
+l-wx------ 1 root root 64 Jun 22 20:36 1 -> pipe:[23145]
+lrwx------ 1 root root 64 Jun 22 20:36 2 -> /dev/pts/4
+total 88
+-rw-r--r-- 1 root  root   894 May 26 23:55 2-C_Language.txt
+-rwxr-xr-x 1 root  root  9132 Jun 22 20:33 a.out
+-rw-r--r-- 1 root  root  1574 Jun 18 23:10 client.c
+-rw-r--r-- 1 root  root  2040 Jun  3 01:25 client_server_pipes.c
+-rw-r--r-- 1 root  root  1949 Jun 18 01:27 daemon.c
+-rw-r--r-- 1 root  root   914 Jun 17 22:04 directory_entry.c
+-rw-r--r-- 1 root  root   579 Jun  4 23:58 exec.c
+-rw-r--r-- 1 root  root  1603 Jun  4 23:57 fork_mmap_private.c
+-rw-r--r-- 1 root  root  1349 Jun  4 23:57 fork_mmap_shared.c
+-rw-r--r-- 1 root  root  1273 Jun  5 20:10 inotify_basic.c
+-rw-r--r-- 1 root  root  2579 Jun  5 22:53 inotify_select.c
+-rw-r--r-- 1 root  root  1543 Jun  3 01:29 memory_mapping.c
+-rw-r--r-- 1 root  root  1916 Jun 22 20:36 pipe_exec.c
+-rw-r--r-- 1 root  root  1135 Jun  3 01:34 pipes.c
+-rw-r--r-- 1 root  root   404 Jun  3 01:41 popen.c
+-rw-r--r-- 1 root  root  2465 Jun  3 01:37 pthread.c
+-rw-r--r-- 1 root  root  2498 Jun 19 00:04 server.c
+-rw-r--r-- 1 root  root   913 May 18 18:36 test.h
+-rw-r--r-- 1 ritsz ritsz  369 Jun  5 02:00 user_group_details.c
+-rw-r--r-- 1 root  root   893 Jun  5 02:12 user_group_exec.c
