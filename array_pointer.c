@@ -8,6 +8,25 @@ void _strcpy(char *s, char *t)
 		;
 }
 
+void _strncpy(char *s, char *t, int n)
+{
+	
+	while(n) {
+		*t++ = *s++;
+		n--;
+	}
+	*t = '\0';
+}
+
+
+void _strcat(char *big, char *small)
+{
+	while (*big != '\0')
+		big++;
+	while ((*big++ = *small++) != '\0')
+		;
+}
+
 int main(void)
 {
 	char a[] = "Hello world\n";
@@ -25,7 +44,7 @@ int main(void)
 	 */
 	char *s = "Hello";
 	char t[6];
-	_strcpy(s,t);
+	_strncpy(s, t, 1);
 	printf("%s\n", t);
 	s = "World";
 	/* Char * can point to a new location because the pointer
@@ -40,4 +59,8 @@ int main(void)
 	char *mp = (char *)malloc(strlen(s) + 1);
 	_strcpy(s, mp);
 	printf("%s\n", mp);
+	char big[12] = "Hello";
+	char *small = " World";
+	_strcat(big, small);
+	printf("Concat: %s\n", big);
 }
