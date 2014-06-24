@@ -2,6 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct mystruct {
+	int n;
+	float f;
+	char c;
+};
+
+#define _offset_of(type, member) (( \
+	(size_t)&(((type *)0)->member) ))
+
 void _strcpy(char *s, char *t)
 {
 	while (*t++ = *s++)
@@ -63,4 +72,15 @@ int main(void)
 	char *small = " World";
 	_strcat(big, small);
 	printf("Concat: %s\n", big);
+
+	struct mystruct m = {
+		.c = 'c', 
+		.n = 42, 
+		.f = 3.14,
+	};
+
+	printf("%u is the offset of char\n", _offset_of(struct mystruct, c));
+	printf("%u is the offset of int\n", _offset_of(struct mystruct, n));
+	printf("%u is the offset of float\n", _offset_of(struct mystruct, f));
+	printf("%u is the size\n", sizeof(struct mystruct));
 }
