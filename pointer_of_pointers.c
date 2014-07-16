@@ -6,6 +6,22 @@
 
 char *buffer[MAXLINE];
 
+char *__read()
+{
+	printf("Enter string : ");
+	char *p, line[80];
+	scanf("%s", line);
+	p = malloc(80);
+	strcpy(p, line);
+	printf("string saved at heap address %p", p);
+	/* We are returning malloced pointer. Since the pointer points to a
+	 * memory address in the heap, the memory won't have garbage when
+	 * accessed post return. That happens with pointers on stack as the
+	 * stack of the funtion is cleared on return.
+	 */
+	return p;
+}
+
 int readlines(char **lineptr, int maxlines)
 {
 	char *p, line[80];
@@ -30,6 +46,10 @@ int readlines(char **lineptr, int maxlines)
 
 int main()
 {
+	char *buff = __read();
+	/* The heap addresses should match */
+	printf("\n%s was read at %p\n", buff, buff);
+
 	int nlines = readlines(buffer, MAXLINE);
 	int i = 0;
 	while(i < nlines) {
