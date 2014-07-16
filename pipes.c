@@ -41,7 +41,7 @@ int main(void)
 		}
 		close(pcfd[0]);
 	} else {
-		wait(NULL);
+		//wait(NULL);
 		if (!write(1, "Parent Process\n", 15)) {
 			perror("write");
 			_exit(-1);
