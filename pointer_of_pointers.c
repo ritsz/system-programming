@@ -33,7 +33,7 @@ int readlines(char **lineptr, int maxlines)
 		 * pointer getting memory in the heap and hence returning from
 		 * this function won't make this memory garbage.
 		 */
-		p = malloc(80);
+		p = (char *)malloc(80);
 		/*Saving the string in heap memory and saving the heap memory's
 		 * pointer in the pointer array
 		 */
