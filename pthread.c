@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 	
-int fid = 0;
+static int fid = 0;
 
 /* If locks are not used, read and write changes the file offset while the other
  * process is hapenning, corrupting the file. Having mutexes, prevents such
