@@ -88,7 +88,9 @@ connection *sslConnect (void) {
       		// Register the available ciphers and digests
       		SSL_library_init ();
 
-      		// New context saying we are a client, and using SSL 2 or 3
+      		/* New context saying we are a client, and using SSL 2 or 3
+		 * client method of type SSL_METHOD
+		 */
       		c->sslContext = SSL_CTX_new (SSLv23_client_method ());
       		if (c->sslContext == NULL)
         		ERR_print_errors_fp (stderr);
