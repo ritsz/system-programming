@@ -161,7 +161,8 @@ void main()
 	buf[err] = '\0';
     	printf ("Received %d chars:'%s'\n", err, buf);
  
-        /*--------------- SSL closure ---------------*/
+        sleep(8);
+	/*--------------- SSL closure ---------------*/
         /* Shutdown the client side of the SSL connection */
  
         err = SSL_shutdown(ssl);
