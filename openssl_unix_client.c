@@ -31,24 +31,22 @@ void main()
 {
 	int err;
         int verify_client = ON; /* To verify a client certificate, set ON */
-	int sock;
+	int sock, max_sd;
         struct sockaddr_in server_addr;
      	char *str;
        	char buf [4096];
         char hello[80];
+	struct timeval timeout;
+	fd_set master_set, working_set;
 	SSL_CTX *ctx;
         SSL *ssl;
        	SSL_METHOD *meth;
       	X509 *server_cert;
         EVP_PKEY *pkey;
-       	short int s_port = 5555;
+       	short int s_port = 12345;
       	const char *s_ipaddr = "127.0.0.1";
        	
 	
-	/*----------------------------------------------------------*/
-      	printf ("Message to be sent to the SSL server: ");
-        fgets (hello, 80, stdin);
- 
       	/* Load encryption & hashing algorithms for the SSL program */
   	SSL_library_init();
  
@@ -149,19 +147,44 @@ void main()
 	} else {
         	printf("The SSL server does not have certificate.\n");
  	}
-    	/*-------- DATA EXCHANGE - send message and receive reply. -------*/
-        /* Send data to the SSL server */
-   	err = SSL_write(ssl, hello, strlen(hello));  
- 	RETURN_SSL(err);
- 
-       	/* Receive data from the SSL server */
-      	err = SSL_read(ssl, buf, sizeof(buf)-1);                     
- 	RETURN_SSL(err);
-    
-	buf[err] = '\0';
-    	printf ("Received %d chars:'%s'\n", err, buf);
- 
-        sleep(8);
+    	FD_ZERO(&master_set);
+       	max_sd = sock;
+        FD_SET(sock, &master_set);
+	FD_SET(0, &master_set);
+
+	timeout.tv_sec  = 3 * 60;
+	timeout.tv_usec = 0;
+
+	do {
+		/*-------- DATA EXCHANGE - send message and receive reply. -------*/
+        	/* Send data to the SSL server */
+   		 memcpy(&working_set, &master_set, sizeof(master_set));
+
+		/**********************************************************/
+		/* Call select() and wait 5 minutes for it to complete.*/
+		/**********************************************************/
+		printf("Waiting on select()...\n");
+		err = select(max_sd + 1, &working_set, NULL, NULL, &timeout);
+		if (err < 0)
+			perror("select() ");
+	
+		if (FD_ISSET(sock, &working_set)) {
+			int n_read = SSL_read(ssl, buf, 4096);
+			if (n_read <= 0)
+				break;
+
+			buf[n_read] = '\0';
+			printf("Message from server : ");
+			write(1, buf, n_read);
+			printf("\n");
+		}
+
+		if (FD_ISSET(0, &working_set)) {
+			gets(hello);
+			SSL_write(ssl, hello, strlen(hello));
+		}
+
+       	} while(err > 0); 
 	/*--------------- SSL closure ---------------*/
         /* Shutdown the client side of the SSL connection */
  

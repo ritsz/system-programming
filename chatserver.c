@@ -46,7 +46,7 @@ void sigchld_handler(int sig)
 	
 	if (WIFEXITED(status))
 		printf("[%d] %d connection has been closed\n", getpid(), WEXITSTATUS(status));
-	return 0;
+	return;
 }
 
 
@@ -59,14 +59,20 @@ int main (int argc, char *argv[])
    	struct timeval timeout;
    	struct sockaddr_in serv_addr, cli_addr;
 	int err;
+	int pipefd[2];
 	char sendBuff[1024];
 	SSL_CTX *ctx;
         SSL *ssl;
         SSL_METHOD *meth;
         X509 *client_cert = NULL;
-
+	
 	memset(sendBuff, '0', sizeof(sendBuff)); 	 
 	signal(SIGCHLD, sigchld_handler);
+
+	pipe(pipefd);
+
+	fcntl(pipefd[0], F_SETFL, fcntl(pipefd[0], F_GETFL)|O_NONBLOCK);
+	fcntl(pipefd[1], F_SETFL, fcntl(pipefd[1], F_GETFL)|O_NONBLOCK);
 	
 	listen_sd = socket(AF_INET, SOCK_STREAM, 0);
   	if (listen_sd < 0) {
@@ -145,7 +151,8 @@ int main (int argc, char *argv[])
 		}
                 cpid = fork();
                 if (cpid == 0) {
-                        //close(listen_sd);
+
+                        close(listen_sd);
                         /* Assign the socket into the SSL structure (SSL and socket without BIO) */
         		SSL_set_fd(ssl, newfd);
 	
@@ -158,28 +165,23 @@ int main (int argc, char *argv[])
 			ticks = time(NULL);
                         snprintf(sendBuff, sizeof(sendBuff), "%.24s\r\n", ctime(&ticks));
        			
-			char buf[100];
-			err = SSL_read(ssl, buf, sizeof(buf) - 1);
-                	RETURN_SSL(err);
-			buf[err] = '\0';
-			printf("[%d] Client Message : %s\n", getpid(), buf);
-                 
 			err = SSL_write(ssl, sendBuff, strlen(sendBuff));
                         RETURN_SSL(err);
 
+			int n_read = 0;
+			do {
+                        	n_read = SSL_read(ssl, sendBuff, strlen(sendBuff));
+				RETURN_SSL(n_read);
 
-			/*while (1) {
-                                printf("Waiting for client data\n");
-                                				
-				printf("Connection was handelled\n");
-                        }*/
-                	err = SSL_shutdown(ssl);
+				SSL_write(ssl, sendBuff, n_read);
+                        } while(n_read > 0);
+                	
+			err = SSL_shutdown(ssl);
         		RETURN_SSL(err);
 	
         		/* Terminate communication on a socket */
         		err = close(newfd);
         		RETURN_ERR(err, "close");
-			sleep(8);
 			exit(newfd);
 		}
                 printf("[%d] %d connection accepted by [%d] from %s, port%d\n",
