@@ -31,13 +31,9 @@
 #define RETURN_NULL(x) if ((x)==NULL) exit(1)
 #define RETURN_ERR(err,s) if ((err)==-1) { perror(s); exit(1); }
 #define RETURN_SSL(err) if ((err)==-1) { ERR_print_errors_fp(stderr); exit(1); }
-
-
 #define SERVER_PORT  12345
-
 #define TRUE             1
 #define FALSE            0
-
 #define PIPING 0
 
 void sigchld_handler(int sig)
@@ -48,6 +44,7 @@ void sigchld_handler(int sig)
 	
 	if (WIFEXITED(status))
 		printf("[%d] %d connection has been closed\n", getpid(), WEXITSTATUS(status));
+	
 	return;
 }
 
