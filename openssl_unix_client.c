@@ -16,8 +16,6 @@
 #define RETURN_ERR(err,s) if ((err)==-1) { perror(s); exit(1); }
 #define RETURN_SSL(err) if ((err)==-1) { ERR_print_errors_fp(stderr); exit(1); }
  
-static int verify_callback(int ok, X509_STORE_CTX *ctx);
- 
 #define RSA_CLIENT_CERT "server.keycrt"
 #define RSA_CLIENT_KEY "server.keycrt"
  
