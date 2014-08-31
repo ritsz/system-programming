@@ -21,6 +21,7 @@ int read_inotify_queue(char buf[], int len)
                 if (event->len)
                 	printf("Name = %s\n", event->name);
 		
+		/* Increment i by the size of the inotify_event */
 		i += sizeof(struct inotify_event) + event->len;
 	}
 	return 0;
