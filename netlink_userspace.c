@@ -5,7 +5,8 @@
 #define NETLINK_USER 31
 
 #define MAX_PAYLOAD 1024 /* maximum payload size*/
-struct sockaddr_nl src_addr, dest_addr;
+struct sockaddr_nl src_addr, dest_addr; /*Special netlink protocol socket
+					  address structure */
 struct nlmsghdr *nlh;
 struct iovec iov;
 int sock_fd;
@@ -18,14 +19,23 @@ void main()
     	if (sock_fd < 0)
         	return -1;
 
+	/* All field in the struture except family and local pid need to be put
+	 * zero. That includes the multicast bits. The local pid and address
+	 * family act as addresses.
+	 */
     	memset(&src_addr, 0, sizeof(src_addr));
     	src_addr.nl_family = AF_NETLINK;
     	src_addr.nl_pid = getpid(); /* self pid */
-
+	
+	/* Bind the netlink socket adress  structure with the netlink family
+	 * socket fd created earlier.
+	 */
     	bind(sock_fd, (struct sockaddr *)&src_addr, sizeof(src_addr));
 
-    	memset(&dest_addr, 0, sizeof(dest_addr));
-    	memset(&dest_addr, 0, sizeof(dest_addr));
+    	/* Again, the destination address structure is made zero. Only family
+	 * and pid (zero to talk to kernel) are specified.
+	 */
+	memset(&dest_addr, 0, sizeof(dest_addr));
     	dest_addr.nl_family = AF_NETLINK;
     	dest_addr.nl_pid = 0; /* For Linux Kernel */
     	dest_addr.nl_groups = 0; /* unicast */
