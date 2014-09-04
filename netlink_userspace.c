@@ -40,7 +40,12 @@ void main()
     	dest_addr.nl_pid = 0; /* For Linux Kernel */
     	dest_addr.nl_groups = 0; /* unicast */
 
-    	nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
+    	/* The netlink message header changes for each data transfer. It holds
+	 * the data to be sent, the total size of data plus header size. The
+	 * header is required to have some common ground for netlink messages of
+	 * all protocols.
+	 */
+	nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
     	memset(nlh, 0, NLMSG_SPACE(MAX_PAYLOAD));
     	nlh->nlmsg_len = NLMSG_SPACE(MAX_PAYLOAD);
     	nlh->nlmsg_pid = getpid();
