@@ -16,9 +16,10 @@ void main()
 {
 	nlh = NULL;
     	sock_fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_USER);
-    	if (sock_fd < 0)
-        	return -1;
-
+    	if (sock_fd < 0) {
+        	perror("socket");	
+		return -1;
+	}
 	/* All field in the struture except family and local pid need to be put
 	 * zero. That includes the multicast bits. The local pid and address
 	 * family act as addresses.
