@@ -212,7 +212,18 @@ void packet_callback (u_char *args, const struct pcap_pkthdr *header,
 		size_tcp = sizeof(struct sniff_icmp);
 		printf("	ICMP header of length: %u\n", size_tcp);
 		icmp = (struct sniff_icmp *)(packet + SIZE_ETHERNET + size_ip);
-		printf("	ICMP TYPE : %u\n", icmp->type);
+		switch (icmp->type) {
+			case 0  : 	printf("	ICMP TYPE : ECHO REPLY\n");
+					break;
+			case 3  :	printf("	ICMP TYPE : DESTINATION UNREACHABLE\n");
+					break;
+			case 8  : 	printf("	ICMP TYPE : ECHO REQUEST\n");
+					break;
+			case 30 :	printf(" 	ICMP TYPE : TRACE ROUTE\n");
+					break;
+			default	:	printf("	ICMP TYPE : UNKNOWN\n");
+					break;
+		}
 	} else {
 		tcp = (struct sniff_tcp*)(packet + SIZE_ETHERNET + size_ip);
 		size_tcp = TH_OFF(tcp)*4;
