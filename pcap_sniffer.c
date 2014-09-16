@@ -62,6 +62,23 @@ struct sniff_tcp {
         u_short th_urp;                 /* urgent pointer */
 };
 
+struct sniff_icmp {
+	u_char type;			/* ICMP type */
+	u_char code;			/* ICMP code */
+	u_short checksum;		/* Checksum of ICMP header and data */
+	union {
+    		struct {
+      			u_int16_t id;
+      			u_int16_t sequence;
+    		} echo;			/* echo datagram */
+    		u_int32_t gateway;	/* gateway address */
+    		struct {
+      			u_int16_t __unused;
+      			u_int16_t mtu;
+    		} frag;			/* path mtu discovery */
+  	} un;
+};
+
 void print_hex_ascii_line(const u_char *payload, int len, int offset)
 {
 
@@ -165,6 +182,7 @@ void packet_callback (u_char *args, const struct pcap_pkthdr *header,
 	const struct sniff_ethernet *ethernet; /* The ethernet header */
 	const struct sniff_ip *ip; /* The IP header */
 	const struct sniff_tcp *tcp; /* The TCP header */
+	const struct sniff_icmp *icmp; /* ICMP header */
 	const char *payload; /* Packet payload */
 
 	u_int size_ip;
@@ -191,7 +209,10 @@ void packet_callback (u_char *args, const struct pcap_pkthdr *header,
 
 	if (ip->ip_p == 1) {
 		/*ICMP PACKET*/
-		size_tcp = 4;
+		size_tcp = sizeof(struct sniff_icmp);
+		printf("	ICMP header of length: %u\n", size_tcp);
+		icmp = (struct sniff_icmp *)(packet + SIZE_ETHERNET + size_ip);
+		printf("	ICMP TYPE : %u\n", icmp->type);
 	} else {
 		tcp = (struct sniff_tcp*)(packet + SIZE_ETHERNET + size_ip);
 		size_tcp = TH_OFF(tcp)*4;
