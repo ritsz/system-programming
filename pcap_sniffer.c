@@ -189,13 +189,18 @@ void packet_callback (u_char *args, const struct pcap_pkthdr *header,
 	printf("	From: %s\n", inet_ntoa(ip->ip_src));
 	printf("	To: %s\n", inet_ntoa(ip->ip_dst));
 
-	tcp = (struct sniff_tcp*)(packet + SIZE_ETHERNET + size_ip);
-	size_tcp = TH_OFF(tcp)*4;
-	if (size_tcp < 20) {
-		printf("	* Invalid TCP header length: %u bytes *\n", size_tcp);
+	if (ip->ip_p == 1) {
+		/*ICMP PACKET*/
+		size_tcp = 4;
 	} else {
-		printf("   	Src port: %d\n", ntohs(tcp->th_sport));
-		printf("	Dst port: %d\n", ntohs(tcp->th_dport));
+		tcp = (struct sniff_tcp*)(packet + SIZE_ETHERNET + size_ip);
+		size_tcp = TH_OFF(tcp)*4;
+		if (size_tcp < 20) {
+			printf("	* Invalid TCP header length: %u bytes *\n", size_tcp);
+		} else {
+			printf("   	Src port: %d\n", ntohs(tcp->th_sport));
+			printf("	Dst port: %d\n", ntohs(tcp->th_dport));
+		}
 	}
 
 	payload = (u_char *)(packet + SIZE_ETHERNET + size_ip + size_tcp);
