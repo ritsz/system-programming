@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
 	bpf_u_int32 net;			/* Our IP */
 	struct pcap_pkthdr header;		/* The header that pcap gives us */
 	const u_char *packet;			/* The actual packet */
-
+	struct pcap_stat ps;			/* Packet capture statistics*/
 
 	printf("Device: %s : Error Buffer %d : Snapshot length %d\n", somedev, PCAP_ERRBUF_SIZE, BUFSIZ);
 	
@@ -273,11 +273,11 @@ int main(int argc, char *argv[])
 	 */
 	handle = pcap_open_live(somedev, BUFSIZ, 1, 1000, errbuf);
 	if (handle == NULL) {
-		fprintf(stderr, "Couldn't open device %s: %s\n", somedev, errbuf);
+		pcap_perror(handle, "pcap_open_live");
 		return(2);
 	}
 	if (pcap_datalink(handle) != DLT_EN10MB) {
-		fprintf(stderr, "Device %s doesn't provide Ethernet headers - not supported\n", somedev);
+		pcap_perror(handle, "pcap_datalink");
 		return(2);
 	}
 	/* Compile and apply the filter. Given an interface handle and
@@ -286,27 +286,38 @@ int main(int argc, char *argv[])
 	 * argument is the netmask
 	 */
 	if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {
-		fprintf(stderr, "Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
+		pcap_perror(handle, "pcap_compile");
 		return(2);
 	}
 	/* Set the new filter program on the interface handle */
 	if (pcap_setfilter(handle, &fp) == -1) {
-		fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
+		pcap_perror(handle, "pcap_setfilter");
 		return(2);
 	}
-	/* Grab a packet */
-	packet = pcap_next(handle, &header);
-	/* Print its length */
-	printf("Jacked a packet with length of [%d]\n", header.len);
 
+	if (0) {
+		/* Grab a packet */
+		packet = pcap_next(handle, &header);
+		/* Print its length */
+		printf("Jacked a packet with length of [%d]\n", header.len);
+	}
 	/* loop on the interface handle 10 times calling the packet_callback
 	 * function everytime we get a packet that matches the filter. The last
 	 * argument is private data that you might want to send the callback
 	 * function.
 	 */
 	if (pcap_loop(handle, 10, packet_callback, NULL) == -1) {
-		fprintf(stderr, "Couldn't loop over packets\n");
+		pcap_perror(handle, "pcap_loop");
 		return(2);
+	}
+
+	/* Collect statistics */
+	if (pcap_stats(handle, &ps) == -1) {
+		pcap_perror(handle, NULL);
+		return(2);
+	} else {
+		printf("\n\n***  PACKETS RECEIVED 			: 	%d\n", ps.ps_recv);
+		printf("***  PACKETS DROPPED BY OS BUFFER	:	%d\n", ps.ps_drop);
 	}
 		
 	/* And close the session */
