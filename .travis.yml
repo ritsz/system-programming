@@ -15,4 +15,4 @@ addons:
 script:
   - export CC=gcc-7
   - export CXX=g++-7
-  - $CC $(find *.c | grep -v "tcl*" | grep -v "pcap*" | grep -v "openssl*")
+  - $CC client.c
